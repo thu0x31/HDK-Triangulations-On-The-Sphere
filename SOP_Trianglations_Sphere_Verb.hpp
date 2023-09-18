@@ -25,23 +25,6 @@
 #include <vector>
 #include <unordered_map>
 
-
-#include <UT/UT_DSOVersion.h>
-#include <CMD/CMD_Manager.h>
-#include <CMD/CMD_Args.h>
-#include <VEX/VEX_VexOp.h>
-#include <OP/OP_Director.h>
-#include <UT/UT_Math.h>
-#include <UT/UT_Interrupt.h>
-#include <GU/GU_Detail.h>
-#include <GU/GU_PrimPoly.h>
-#include <CH/CH_LocalVariable.h>
-#include <PRM/PRM_Include.h>
-#include <OP/OP_Operator.h>
-#include <OP/OP_OperatorTable.h>
-#include <GU/GU_PrimPart.h>
-#include <GA/GA_AttributeRef.h>
-
 class SOP_Triangulations_Sphere_Verb : public SOP_NodeVerb
 {
 public:
@@ -69,7 +52,6 @@ private:
     using Kernel = CGAL::Exact_predicates_exact_constructions_kernel_with_sqrt;    
     using FT = Kernel::FT;
     using Traits = CGAL::Projection_on_sphere_traits_3<Kernel>;
-    using CGALPoint_3 = Traits::Point_3;
     using Triangulation = CGAL::Delaunay_triangulation_on_sphere_2<Traits>;
 
     auto makePoly(GU_Detail* detail, Triangulation&& triangulation) const
@@ -96,11 +78,14 @@ private:
         
         constexpr auto POLYSIZE = 3;
         std::vector<int> indices(triangulation.number_of_faces() * POLYSIZE);
+        int index = 0;
         for (auto&& f = triangulation.finite_faces_begin(); f != triangulation.finite_faces_end(); ++f)
         {
-            indices.push_back(indexMap[f->vertex(0)]);
-            indices.push_back(indexMap[f->vertex(1)]);
-            indices.push_back(indexMap[f->vertex(2)]);
+            indices[index]     = indexMap[f->vertex(0)];
+            indices[index + 1] = indexMap[f->vertex(1)];
+            indices[index + 2] = indexMap[f->vertex(2)];
+
+            index += POLYSIZE;
         }
 
         GA_PolyCounts polyCounts;
@@ -124,7 +109,7 @@ public:
         auto&& outputGeo = cookparms.gdh().gdpNC();
         outputGeo->clearAndDestroy();
 
-        std::vector<CGALPoint_3> points(inputGeo->getNumPoints());
+        std::vector<Traits::Point_3> points(inputGeo->getNumPoints());
         inputGeo->forEachPoint(
             [&points, &inputGeo] (GA_Offset ptoff) 
             {
@@ -134,8 +119,7 @@ public:
         );
 
         const int&& radius = 1; // TODO: パラメータ化する
-        auto&& center = CGALPoint_3(0, 0, 0);
-        auto&& dtos = Triangulation(points.begin(), points.end(), Traits(center, radius));
+        auto&& dtos = Triangulation(points.begin(), points.end(), Traits({0,0,0}, radius));
 
         this->makePoly(outputGeo, std::move(dtos));
     }
