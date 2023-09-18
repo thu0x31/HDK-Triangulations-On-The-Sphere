@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SOP_Triangulations_Sphere.proto.h"
+#include "SOP_Triangulations_On_The_Sphere.proto.h"
 
-#include "SOP_Triangulations_Sphere_Info.hpp"
+#include "SOP_Triangulations_On_The_Sphere_Info.hpp"
 #include <GA/GA_Detail.h>
 #include <GA/GA_PolyCounts.h>
 #include <GEO/GEO_PrimPoly.h>
@@ -25,22 +25,22 @@
 #include <vector>
 #include <unordered_map>
 
-class SOP_Triangulations_Sphere_Verb : public SOP_NodeVerb
+class SOP_Triangulations_On_The_Sphere_Verb : public SOP_NodeVerb
 {
 public:
-    inline static const SOP_NodeVerb::Register<SOP_Triangulations_Sphere_Verb> theVerb;
+    inline static const SOP_NodeVerb::Register<SOP_Triangulations_On_The_Sphere_Verb> theVerb;
 
-    SOP_Triangulations_Sphere_Verb() {}
-    virtual ~SOP_Triangulations_Sphere_Verb() {}
+    SOP_Triangulations_On_The_Sphere_Verb() {}
+    virtual ~SOP_Triangulations_On_The_Sphere_Verb() {}
 
     virtual SOP_NodeParms *allocParms() const
     {
-        return new SOP_Triangulations_SphereParms();
+        return new SOP_Triangulations_On_The_SphereParms();
     }
 
     virtual UT_StringHolder name() const 
     {
-        return SOP_Triangulations_Sphere_Info::TYPENAME;
+        return SOP_Triangulations_On_The_Sphere_Info::TYPENAME;
     }
 
     virtual CookMode cookMode(const SOP_NodeParms *parms) const 

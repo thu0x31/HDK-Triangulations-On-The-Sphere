@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.6 )
 
-project( HDK_CGAL_SOP_Triangulations_Sphere )
+project( HDK_SOP_Triangulations_On_The_Sphere )
 
 if (MSVC)
     set(VCPKG_BUILD_TYPE release)
@@ -11,19 +11,20 @@ list( APPEND CMAKE_PREFIX_PATH "$ENV{HFS}/toolkit/cmake" )
 find_package( Houdini REQUIRED )
 find_package( CGAL REQUIRED )
 
-set( library_name SOP_Triangulations_Sphere )
+set( library_name SOP_Triangulations_On_The_Sphere )
 
-houdini_generate_proto_headers( FILES  SOP_Triangulations_Sphere.cpp )
+houdini_generate_proto_headers( FILES  src/SOP_Triangulations_On_The_Sphere.cpp )
 
 add_library( ${library_name} SHARED
-    SOP_Triangulations_Sphere.cpp
-    SOP_Triangulations_Sphere.hpp
+    src/SOP_Triangulations_On_The_Sphere.cpp
+    src/SOP_Triangulations_On_The_Sphere.hpp
 )
 
 target_link_libraries( ${library_name} Houdini CGAL)
 
 target_include_directories( ${library_name} PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/src
 )
 
 houdini_configure_target( ${library_name} )
