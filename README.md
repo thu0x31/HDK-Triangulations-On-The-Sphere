@@ -1,7 +1,7 @@
 1. install cgal windows
 https://doc.cgal.org/latest/Manual/windows.html
 ```
-.\vcpkg.exe list --triplet x64-windows
+.\vcpkg.exe install cgal:x64-windows
 ```
   
 2. build
