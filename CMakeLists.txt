@@ -44,3 +44,5 @@ if (MSVC)
         COMMENT "moved gmp-10.dll"
     )
 endif (MSVC)
+
+# TODO: icon
