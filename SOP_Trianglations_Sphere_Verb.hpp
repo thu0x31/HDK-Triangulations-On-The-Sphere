@@ -3,8 +3,10 @@
 #include "SOP_Triangulations_Sphere.proto.h"
 
 #include "SOP_Triangulations_Sphere_Info.hpp"
+#include <GA/GA_Detail.h>
 #include <GA/GA_PolyCounts.h>
 #include <GEO/GEO_PrimPoly.h>
+#include <GEO/GEO_Point.h>
 #include <GU/GU_Detail.h>
 #include <OP/OP_Operator.h>
 #include <OP/OP_OperatorTable.h>
@@ -23,7 +25,22 @@
 #include <vector>
 #include <unordered_map>
 
-#include <fstream>
+
+#include <UT/UT_DSOVersion.h>
+#include <CMD/CMD_Manager.h>
+#include <CMD/CMD_Args.h>
+#include <VEX/VEX_VexOp.h>
+#include <OP/OP_Director.h>
+#include <UT/UT_Math.h>
+#include <UT/UT_Interrupt.h>
+#include <GU/GU_Detail.h>
+#include <GU/GU_PrimPoly.h>
+#include <CH/CH_LocalVariable.h>
+#include <PRM/PRM_Include.h>
+#include <OP/OP_Operator.h>
+#include <OP/OP_OperatorTable.h>
+#include <GU/GU_PrimPart.h>
+#include <GA/GA_AttributeRef.h>
 
 class SOP_Triangulations_Sphere_Verb : public SOP_NodeVerb
 {
@@ -55,7 +72,7 @@ private:
     using CGALPoint_3 = Traits::Point_3;
     using Triangulation = CGAL::Delaunay_triangulation_on_sphere_2<Traits>;
 
-    auto makeFace(GU_Detail* detail, Triangulation&& triangulation) const
+    auto makePoly(GU_Detail* detail, Triangulation&& triangulation) const
     {
         std::unordered_map<Triangulation::Vertex_handle, GA_Offset> indexMap;
 
@@ -77,7 +94,8 @@ private:
             point_idx++;
         }
         
-        std::vector<int> indices;
+        constexpr auto POLYSIZE = 3;
+        std::vector<int> indices(triangulation.number_of_faces() * POLYSIZE);
         for (auto&& f = triangulation.finite_faces_begin(); f != triangulation.finite_faces_end(); ++f)
         {
             indices.push_back(indexMap[f->vertex(0)]);
@@ -86,7 +104,7 @@ private:
         }
 
         GA_PolyCounts polyCounts;
-        polyCounts.append(3, triangulation.number_of_faces());
+        polyCounts.append(POLYSIZE, triangulation.number_of_faces());
         GEO_PrimPoly::buildBlock(
                                     detail,
                                     static_cast<GA_Offset>(0),
@@ -100,34 +118,26 @@ public:
     virtual void cook(const CookParms &cookparms) const
     {
         auto&& inputGeo = cookparms.inputGeo(0);
-        auto&& outputGeo = cookparms.gdh().gdpNC();
         if (!inputGeo)
             return;
         
+        auto&& outputGeo = cookparms.gdh().gdpNC();
         outputGeo->clearAndDestroy();
 
         std::vector<CGALPoint_3> points(inputGeo->getNumPoints());
-        unsigned int&& index = 0;
-        for(auto&& point : points)
-        {
-            auto&& pointOffset = inputGeo->pointOffset(index);
-            auto&& pointPosition = inputGeo->getPos3D(pointOffset);
-
-            point = {
-                    pointPosition.x(),
-                    pointPosition.y(),
-                    pointPosition.z()
-                };
-
-            index++;
-        }
+        inputGeo->forEachPoint(
+            [&points, &inputGeo] (GA_Offset ptoff) 
+            {
+                auto&& pos = inputGeo->getPos3(ptoff);
+                points[ptoff] = { pos.x(), pos.y(), pos.z() };
+            }
+        );
 
         const int&& radius = 1; // TODO: パラメータ化する
         auto&& center = CGALPoint_3(0, 0, 0);
-        auto&& traits = Traits(center, radius);
-        auto&& dtos = Triangulation(points.begin(), points.end(), traits);
+        auto&& dtos = Triangulation(points.begin(), points.end(), Traits(center, radius));
 
-        this->makeFace(outputGeo, std::move(dtos));
+        this->makePoly(outputGeo, std::move(dtos));
     }
 
 };
