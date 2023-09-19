@@ -1,3 +1,7 @@
+WIP
+CGAL 2D Triangulations on the Sphere in Houdini
+https://doc.cgal.org/latest/Triangulation_on_sphere_2/index.html#Chapter_2D_Triangulations_on_sphere
+
 1. install cgal windows
 https://doc.cgal.org/latest/Manual/windows.html
 ```

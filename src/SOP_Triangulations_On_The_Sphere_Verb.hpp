@@ -109,11 +109,13 @@ public:
         auto&& outputGeo = cookparms.gdh().gdpNC();
         outputGeo->clearAndDestroy();
 
+        std::cout << "input geo point num : " << inputGeo->getNumPoints() << std::endl;
+
         std::vector<Traits::Point_3> points(inputGeo->getNumPoints());
         inputGeo->forEachPoint(
             [&points, &inputGeo] (GA_Offset ptoff) 
             {
-                auto&& pos = inputGeo->getPos3(ptoff);
+                auto&& pos = inputGeo->getPos3D(ptoff);
                 points[ptoff] = { pos.x(), pos.y(), pos.z() };
             }
         );
@@ -121,7 +123,11 @@ public:
         const int&& radius = 1; // TODO: パラメータ化する
         auto&& dtos = Triangulation(points.begin(), points.end(), Traits({0,0,0}, radius));
 
+        std::cout << "triangulation point num : " << dtos.number_of_vertices() << std::endl;
+
         this->makePoly(outputGeo, std::move(dtos));
+
+        std::cout << "output geo point num : " << outputGeo->getNumPoints() << std::endl;
     }
 
 };
