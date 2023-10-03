@@ -2,11 +2,11 @@ cmake_minimum_required( VERSION 3.6 )
 
 project( HDK_SOP_Triangulations_On_The_Sphere )
 
-if (MSVC)
-    set(VCPKG_BUILD_TYPE release)
-endif (MSVC)
-
-list( APPEND CMAKE_PREFIX_PATH "$ENV{HFS}/toolkit/cmake" )
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    if (MSVC)
+        set(VCPKG_BUILD_TYPE release)
+    endif (MSVC)
+endif()
 
 find_package( Houdini REQUIRED )
 find_package( CGAL REQUIRED )

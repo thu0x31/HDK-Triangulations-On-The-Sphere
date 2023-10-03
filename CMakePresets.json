@@ -1,0 +1,66 @@
+{
+    "version": 5,
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "toolset": {
+                "value": "host=x64",
+                "strategy": "external"
+            },
+            "environment": {
+                "HOUDINI_ROOT": "C:/Program Files (x86)/Steam/steamapps/common/Houdini Indie"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_PREFIX_PATH": "$env{HOUDINI_ROOT}/toolkit/cmake"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "hostOS": [ "Windows" ]
+                }
+            }
+        },
+        {
+            "name": "release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O2",
+                "CMAKE_C_FLAGS_RELEASE": "-O2"
+            }
+        },
+        {
+            "name": "release-visual-studio-windows-x64",
+            "inherits": ["default", "release"]
+        },
+        {
+            "name": "release-ninja-windows-x64",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+            },
+            "inherits": ["default", "release"]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-release-visual-studio-windows-x64",
+            "configurePreset": "release-visual-studio-windows-x64",
+            "configuration": "Release"
+        },
+        {
+            "name": "build-release-ninja-windows-x64",
+            "configurePreset": "release-ninja-windows-x64",
+            "configuration": "Release"
+        }
+    ]
+}
