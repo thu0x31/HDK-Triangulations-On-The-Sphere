@@ -5,6 +5,7 @@
 #include "SOP_Triangulations_On_The_Sphere_Info.hpp"
 #include <GA/GA_Detail.h>
 #include <GA/GA_PolyCounts.h>
+#include <GA/GA_GBMacros.h>
 #include <GEO/GEO_PrimPoly.h>
 #include <GEO/GEO_Point.h>
 #include <GU/GU_Detail.h>
@@ -71,7 +72,7 @@ private:
 
             detail->setPos3(ptoff, pos);
 
-            indexMap[v] = static_cast<GA_Offset>(ptoff);
+            indexMap[v] = ptoff;
 
             point_idx++;
         }
@@ -111,14 +112,13 @@ public:
 
         std::cout << "input geo point num : " << inputGeo->getNumPoints() << std::endl;
 
-        std::vector<Traits::Point_3> points(inputGeo->getNumPoints());
-        inputGeo->forEachPoint(
-            [&points, &inputGeo] (GA_Offset ptoff) 
-            {
-                auto&& pos = inputGeo->getPos3D(ptoff);
-                points[ptoff] = { pos.x(), pos.y(), pos.z() };
-            }
-        );
+        std::vector<Traits::Point_3> points;
+        GA_Offset pointOffset;
+        GA_FOR_ALL_PTOFF(inputGeo, pointOffset)
+    	{
+                auto&& pos = inputGeo->getPos3D(pointOffset);
+                points.push_back({ pos.x(), pos.y(), pos.z() });   
+    	}
 
         const int&& radius = 1; // TODO: パラメータ化する
         auto&& dtos = Triangulation(points.begin(), points.end(), Traits({0,0,0}, radius));
